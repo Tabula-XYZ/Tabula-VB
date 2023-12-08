@@ -2,142 +2,42 @@ import React, { useEffect, useState } from "react";
 import moment from "moment";
 import _ from 'lodash'
 import styled from "styled-components";
-import { BLACK, BLUE_NAVY, CLEAR_BLACK, DARK_GREEN, DARK_GREY, GOLD, GREEN, RED, WHITE_GREY } from "../constants";
+import { BLACK, BLUE_NAVY, CLEAR_BLACK, DARK_GREEN, DARK_GREY, RED, WHITE_GREY } from "../constants";
 import * as Flags from "react-flags-select";
 import axios, { AxiosRequestConfig } from "axios";
 import Loading from "./loader";
 import Link from "./link";
+import { IFingerprintData, IProxy } from "../types";
 
-export interface IProxy {
-    ip: string
-    port: number
-    username: string
-    password: string
-  }
-  
-  
-  export interface IFingerprintData {
-    fingerprint: {
-      screen: {
-        availHeight: number;
-        availWidth: number;
-        pixelDepth: number;
-        height: number;
-        width: number;
-        availTop: number;
-        availLeft: number;
-        colorDepth: number;
-        innerHeight: number;
-        outerHeight: number;
-        outerWidth: number;
-        innerWidth: number;
-        screenX: number;
-        pageXOffset: number;
-        pageYOffset: number;
-        devicePixelRatio: number;
-        clientWidth: number;
-        clientHeight: number;
-        hasHDR: boolean;
-      };
-      navigator: {
-        userAgent: string;
-        userAgentData: any;
-        language: string;
-        languages: string[];
-        platform: string;
-        deviceMemory: number;
-        hardwareConcurrency: number;
-        maxTouchPoints: number;
-        product: string;
-        productSub: string;
-        vendor: string;
-        vendorSub: string | null;
-        doNotTrack: string | null;
-        appCodeName: string;
-        appName: string;
-        appVersion: string;
-        oscpu: string | null;
-        extraProperties: any;
-        webdriver: boolean;
-      };
-      audioCodecs: {
-        ogg: string;
-        mp3: string;
-        wav: string;
-        m4a: string;
-        aac: string;
-      };
-      videoCodecs: {
-        ogg: string;
-        h264: string;
-        webm: string;
-      };
-      pluginsData: {
-        plugins: any[];
-        mimeTypes: any[];
-      };
-      battery: {
-        charging: boolean;
-        chargingTime: number;
-        dischargingTime: number | null;
-        level: number;
-      };
-      videoCard: {
-        vendor: string;
-        renderer: string;
-      };
-      multimediaDevices: {
-        speakers: any[];
-        micros: any[];
-        webcams: any[];
-      };
-      fonts: string[];
-    };
-    headers: {
-      'sec-ch-ua': string;
-      'sec-ch-ua-mobile': string;
-      'sec-ch-ua-platform': string;
-      'upgrade-insecure-requests': string;
-      'user-agent': string;
-      accept: string;
-      'sec-fetch-site': string;
-      'sec-fetch-mode': string;
-      'sec-fetch-user': string;
-      'sec-fetch-dest': string;
-      'accept-encoding': string;
-      'accept-language': string;
-    };
-  }
-
-  interface GeoLocation {
-    ip: string;
-    network: string;
-    version: string;
-    city: string;
-    region: string;
-    region_code: string;
-    country: string;
-    country_name: string;
-    country_code: string;
-    country_code_iso3: string;
-    country_capital: string;
-    country_tld: string;
-    continent_code: string;
-    in_eu: boolean;
-    postal: string;
-    latitude: number;
-    longitude: number;
-    timezone: string;
-    utc_offset: string;
-    country_calling_code: string;
-    currency: string;
-    currency_name: string;
-    languages: string;
-    country_area: number;
-    country_population: number;
-    asn: string;
-    org: string;
-  }
+interface GeoLocation {
+  ip: string;
+  network: string;
+  version: string;
+  city: string;
+  region: string;
+  region_code: string;
+  country: string;
+  country_name: string;
+  country_code: string;
+  country_code_iso3: string;
+  country_capital: string;
+  country_tld: string;
+  continent_code: string;
+  in_eu: boolean;
+  postal: string;
+  latitude: number;
+  longitude: number;
+  timezone: string;
+  utc_offset: string;
+  country_calling_code: string;
+  currency: string;
+  currency_name: string;
+  languages: string;
+  country_area: number;
+  country_population: number;
+  asn: string;
+  org: string;
+}
 
 const Cell = (props: IProps) => {
 
@@ -177,8 +77,7 @@ const Cell = (props: IProps) => {
         } catch (error) {
           return 'unable to fetch ip'
         }
-      }
-
+    }
 
     const renderTitle = () => {
         if (!fingerprint) 
