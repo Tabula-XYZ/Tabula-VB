@@ -2,9 +2,15 @@ import { Browser, BrowserContext, BrowserContextOptions } from "playwright";
 import { IFingerprintData, IProxy } from "../src/types";
 import { getChromePath, isBase64, isFilePath, removeCharactersBeforeUnderscore, testProxy } from "./utils";
 import { chromium } from "playwright-extra";
-import { FingerprintInjector } from "fingerprint-injector";
 import { isObject } from "lodash";
+import { IBrowserState } from "../src/types2";
 
+const { FingerprintInjector } = require('fingerprint-injector');
+
+// Load the stealth plugin and use defaults (all tricks to hide playwright usage)
+// Note: playwright-extra is compatible with most puppeteer-extra plugins
+const stealth = require('puppeteer-extra-plugin-stealth')()
+chromium.use(stealth)
 
 export class VB {
 
@@ -14,8 +20,8 @@ export class VB {
       proxy?: IProxy;
       fingerprint?: IFingerprintData;
       context_str?: string;
+      chrome_path?: string;
     } | null = null
-  
   
     constructor(){}
   
@@ -62,13 +68,14 @@ export class VB {
           const s: IBrowserState = {
             context_base64: CONTEXT_PREFIX+ Buffer.from(JSON.stringify(state)).toString('base64'),
             current_url: pages[0].url(),
+            chrome_path: this.browserSettings?.chrome_path || '',
             connected: browser.isConnected(),
             window: {
               width: pages[0]?.viewportSize()?.width || 0,
               height: pages[0]?.viewportSize()?.height || 0,
             },
-            has_proxy: !!this.browserSettings?.proxy,
-            has_fingerprint: !!this.browserSettings?.fingerprint,
+            fingerprint: this.browserSettings?.fingerprint,
+            proxy: this.browserSettings?.proxy,
             has_context: !!this.browserSettings?.context_str,
           } 
           return s
@@ -157,24 +164,28 @@ export class VB {
             return `Error: Invalid context`
           }
       }
+
   
       try {
         const context = await this.browser.newContext(opt);
         context.setDefaultTimeout(60000);
         const fingerprintInjector = new FingerprintInjector();
-        if (fingerPrintValid)
-            await fingerprintInjector.attachFingerprintToPlaywright(context, fingerprint as any);
+        if (fingerPrintValid){
+          await fingerprintInjector.attachFingerprintToPlaywright(context, fingerprint as any);
+        }
         this.context = context;
         const page = await context.newPage();
         await page.goto('https://google.com');
       } catch (e) {
+        console.log(e)
         return `Error: ${e}`;
       }
   
       this.browserSettings = {
         proxy,
         fingerprint,
-        context_str
+        context_str,
+        chrome_path: CHROME_BIN_PATH
       }
   
       return null;

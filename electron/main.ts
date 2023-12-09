@@ -1,10 +1,7 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'node:path'
-import { chromium } from 'playwright-extra'
 import { isFilePath } from './utils'
 import { VB } from './vb';
-const stealth = require('puppeteer-extra-plugin-stealth')()
-chromium.use(stealth)
 
 process.env.DIST = path.join(__dirname, '../dist')
 process.env.VITE_PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.env.DIST, '../public')
@@ -76,8 +73,8 @@ function createWindow() {
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL)
   } else {
-    // win.loadFile('dist/index.html')
-    win.loadFile(path.join(process.env.DIST, 'index.html'))
+    win.loadFile('dist/index.html')
+    // win.loadFile(path.join(process.env.DIST, 'index.html'))
   }
 }
 

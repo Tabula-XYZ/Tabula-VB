@@ -1,25 +1,32 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import styled from "styled-components"
-import { BLACK, DARK_GREY } from "./constants"
+import { BLACK, DARK_GREY, showAlertMessage } from "./constants"
 import Input from "./components/input"
 import Dropzone from './components/dropzone'
 import Button from "./components/button"
 import jszip from 'jszip'
 import Fingerprint  from './components/fingerprint'
-import { sendIpcMessage, trackIpcMessage } from './utils/utils'
+import { copyToClipboard, sendIpcMessage, trackIpcMessage } from './utils/utils'
 import { IFingerprintData, IProxy } from './types'
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
+import DropdownAlert from './components/dropdown'
+import { IBrowserState } from './types2'
 
 const SEC_BEFORE_REFRESH = 30
+let browserStateFetchingCount = 0
+
+
+const storedfingerprint = localStorage.getItem('fingerprint')
+const storedproxy = localStorage.getItem('proxy')
 
 function App() {
-
+  const dropdownRef = useRef<DropdownAlert>(null);
   const [token, setToken] = React.useState('')
   const [ loading, setLoading ] = React.useState(false)
 
-  const [fingerprint, setFingerprint] = React.useState<IFingerprintData | null>(null)
-  const [proxy, setProxy] = React.useState<IProxy | null>(null)
+  const [fingerprint, setFingerprint] = React.useState<IFingerprintData | null>(storedfingerprint ? JSON.parse(storedfingerprint) : null)
+  const [proxy, setProxy] = React.useState<IProxy | null>(storedproxy ? JSON.parse(storedproxy) : null)
   const [error, setError] = React.useState<string | null>(null)
   const [chromePath,setChromePath] = React.useState<string | null>(localStorage.getItem('chrome_path'))
   const [secBeforeRefresh, setSecBeforeRefresh] = React.useState(SEC_BEFORE_REFRESH)
@@ -45,6 +52,16 @@ function App() {
 }, [secBeforeRefresh]);
 
 
+  const onClickCopyToken = (token: string) => {
+    copyToClipboard(token)
+    showAlertMessage(dropdownRef).info('Token copied to clipboard')
+  }
+
+  const onClickURL = (url: string) => {
+    copyToClipboard(url)
+    showAlertMessage(dropdownRef).info('URL copied to clipboard')
+  }
+
   useEffect(() => {
 
     trackIpcMessage('runvbreply', (event, data) => {
@@ -57,11 +74,18 @@ function App() {
     })
 
     trackIpcMessage('getvbstatereply', (event, data) => {
-      if (event){
-        const { state } = data
-        setBrowserState(state)
-        chromePath && localStorage.setItem('chrome_path', chromePath)
-        setSecBeforeRefresh(SEC_BEFORE_REFRESH)
+      browserStateFetchingCount -= 1
+      try {
+        if (event){
+          const state = data.state as IBrowserState
+          setBrowserState(state)
+          state.chrome_path && localStorage.setItem('chrome_path', state.chrome_path)
+          state.fingerprint && localStorage.setItem('fingerprint', JSON.stringify(state.fingerprint))
+          state.proxy && localStorage.setItem('proxy', JSON.stringify(state.proxy))
+          setSecBeforeRefresh(SEC_BEFORE_REFRESH)
+        }
+      } catch (e){
+        console.log(e)
       }
     })
 
@@ -114,7 +138,10 @@ function App() {
   }
 
   const fetchBrowserState = () => {
-    sendIpcMessage('getvbstate', {})
+    if (browserStateFetchingCount === 0){
+      browserStateFetchingCount += 1
+      sendIpcMessage('getvbstate', {})
+    }
   }
 
   const fetchChromePath = () => {
@@ -123,12 +150,14 @@ function App() {
 
   const handlePlaywrightAction = async () => {
     setLoading(true)
-    sendIpcMessage('runvb', {
-      context: token,
-      fingerprint,
-      proxy,
-      path: chromePath
-    })
+    if (!loading){
+      sendIpcMessage('runvb', {
+        context: token,
+        fingerprint,
+        proxy,
+        path: chromePath
+      })
+    }
   };
 
   const reset = () => {
@@ -157,7 +186,7 @@ function App() {
           </div>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
             <Input value={current_url} disabled={true}  />
-            <img style={{width: 20, height: 20, paddingLeft: '5%'}} src={'/images/copy-blue.png'} />
+            <img onClick={() => onClickURL(current_url)}  style={{width: 20, height: 20, paddingLeft: '5%'}} src={'/images/copy-blue.png'} />
           </div>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 20, marginBottom: 5}}>
             <img src={'/images/blue-key.png'} style={{width: 14, height: 14, marginRight: 4}} />
@@ -165,7 +194,7 @@ function App() {
           </div>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
             <Input value={context_base64} disabled={true}  />
-            <img style={{width: 20, height: 20, paddingLeft: '5%'}} src={'/images/copy-blue.png'} />
+            <img onClick={() => onClickCopyToken(context_base64)}  style={{width: 20, height: 20, paddingLeft: '5%'}} src={'/images/copy-blue.png'} />
           </div>
           <Button 
             color={'red'}
@@ -255,7 +284,7 @@ function App() {
           iconStyle={{width: 18, height: 18, marginRight: 7}}
           title={'START CHROME'}
           disabled={!fingerprint || !proxy}
-          onClick={handlePlaywrightAction}
+          onClick={() => handlePlaywrightAction()}
           loading={loading}
           textStyle={{fontSize: 12}}
           style={{width: '90%', marginLeft: '5%', marginTop: fingerprint ? 10: 25, height: 35}}
@@ -270,6 +299,7 @@ function App() {
         <div style={{display:'flex', flexDirection: 'column', width: '100%', height: '100%'}}>
           {renderNewWindow()}
         </div>
+        <DropdownAlert ref={dropdownRef} />
       </div>
   )
 }

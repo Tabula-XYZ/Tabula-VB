@@ -1,18 +1,19 @@
 {
   "name": "tabula-vb",
+  "displayName": "Tabula VB",
   "description": "This is the virtual browser for Tabula to interract with social media accounts used with Tabula",
   "private": true,
   "version": "0.0.1",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && electron-builder",
-    "build-win": "tsc && vite build && electron-builder -win",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "gitlinks": "rm ./src/types.ts && cp -rf /Users/louis/tweet/scrapper/src/types.ts ./src/types.ts && git add ./src/types.ts && git commit -m 'update symbolic links' && git push",
     "links": "rm ./src/types.ts && ln -s /Users/louis/tweet/scrapper/src/types.ts ./src/types.ts"
   },
   "build": {
+    "displayName": "Tabula VB",
     "mac": {
       "icon": "public/images/logo.png"
     },
