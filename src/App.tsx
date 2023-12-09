@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import styled from "styled-components"
 import { BLACK, DARK_GREY } from "./constants"
 import Input from "./components/input"
@@ -11,12 +11,78 @@ import { IFingerprintData, IProxy } from './types'
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 
+const SEC_BEFORE_REFRESH = 30
+
 function App() {
 
   const [token, setToken] = React.useState('')
+  const [ loading, setLoading ] = React.useState(false)
+
   const [fingerprint, setFingerprint] = React.useState<IFingerprintData | null>(null)
   const [proxy, setProxy] = React.useState<IProxy | null>(null)
   const [error, setError] = React.useState<string | null>(null)
+  const [chromePath,setChromePath] = React.useState<string | null>(localStorage.getItem('chrome_path'))
+  const [secBeforeRefresh, setSecBeforeRefresh] = React.useState(SEC_BEFORE_REFRESH)
+  
+  const [browserState, setBrowserState] = React.useState<null | IBrowserState>(null)
+
+  useEffect(() => {
+    // Exit early when we reach 0
+    if (!secBeforeRefresh) {
+        // Trigger your action here
+        browserState && fetchBrowserState()
+        // Reset countdown
+        setSecBeforeRefresh(SEC_BEFORE_REFRESH);
+        return;
+    }
+
+    // Save intervalId to clear the interval when the component unmounts
+    const intervalId = setInterval(() => {
+      setSecBeforeRefresh(secBeforeRefresh - 1);
+    }, 1000)
+
+    return () => clearInterval(intervalId)
+}, [secBeforeRefresh]);
+
+
+  useEffect(() => {
+
+    trackIpcMessage('runvbreply', (event, data) => {
+      if (event){
+        const { error }  =  data
+        error && setError(error)
+        setLoading(false)
+        fetchBrowserState()
+      }
+    })
+
+    trackIpcMessage('getvbstatereply', (event, data) => {
+      if (event){
+        const { state } = data
+        setBrowserState(state)
+        chromePath && localStorage.setItem('chrome_path', chromePath)
+        setSecBeforeRefresh(SEC_BEFORE_REFRESH)
+      }
+    })
+
+    trackIpcMessage('closevbreply', () => {
+      setBrowserState(null)
+      setLoading(false)
+      setSecBeforeRefresh(SEC_BEFORE_REFRESH)
+    })
+
+    trackIpcMessage('getpathreply', (event, data) => {
+      if (event && data && data.path){
+        setChromePathMiddleware(data.path)
+      }
+    })
+
+    !chromePath && fetchChromePath()
+  }, [])
+
+  useEffect(() => {
+    setError(null)
+  }, [fingerprint, token])
 
   const onDrop = async (file: File[]) => {
     const zip = new jszip();
@@ -39,23 +105,97 @@ function App() {
     }
   }
 
+  const setChromePathMiddleware = (path: string) => {
+    setChromePath(path)
+  }
+
+  const closeBrowser = () => {
+    sendIpcMessage('closevb', {})
+  }
+
+  const fetchBrowserState = () => {
+    sendIpcMessage('getvbstate', {})
+  }
+
+  const fetchChromePath = () => {
+    sendIpcMessage('getpath', {})
+  }
+
   const handlePlaywrightAction = async () => {
-    
+    setLoading(true)
     sendIpcMessage('runvb', {
       context: token,
       fingerprint,
-      proxy
-    })
-
-    trackIpcMessage('runvbreply', (event, data) => {
-      console.log(data)
+      proxy,
+      path: chromePath
     })
   };
 
+  const reset = () => {
+    setFingerprint(null)
+    setProxy(null)
+    setToken('')
+    setError(null)
+    closeBrowser()
+
+  }
+
   const renderNewWindow = () => {
+
+    const renderBrowserStateView = () => {
+      if (!browserState) 
+        return null
+      
+      const { context_base64, current_url } = browserState
+      return (
+        <div style={{width: '90%', height: '100%', display: 'flex', flexDirection: 'column', paddingTop: 20, paddingLeft: '5%', paddingRight: '5%'}}>
+          <Title>VIRTUAL BROWSER <span style={{fontSize: 10.5, color: DARK_GREY}}><br />(data re-calculated in <span style={{color: BLACK, fontSize: 11.5}}>{secBeforeRefresh}s</span>)</span></Title>
+
+          {fingerprint && proxy && <div style={{marginTop: 15}}><Fingerprint fingerprint={fingerprint} proxy={proxy} /></div>}
+          <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 20, marginBottom: 5}}>
+            <SectionTitle>CURRENT PAGE</SectionTitle>
+          </div>
+          <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+            <Input value={current_url} disabled={true}  />
+            <img style={{width: 20, height: 20, paddingLeft: '5%'}} src={'/images/copy-blue.png'} />
+          </div>
+          <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 20, marginBottom: 5}}>
+            <img src={'/images/blue-key.png'} style={{width: 14, height: 14, marginRight: 4}} />
+            <SectionTitle>CURRENT TOKEN</SectionTitle>
+          </div>
+          <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+            <Input value={context_base64} disabled={true}  />
+            <img style={{width: 20, height: 20, paddingLeft: '5%'}} src={'/images/copy-blue.png'} />
+          </div>
+          <Button 
+            color={'red'}
+            loading={loading}
+            icon='images/chrome.png'
+            iconStyle={{width: 18, height: 18, marginRight: 7}}
+            title={'CLOSE VIRTUAL BROWSER'}
+            onClick={() => {
+              closeBrowser()
+              setLoading(true)
+            }}
+            textStyle={{fontSize: 12}}
+            style={{width: '100%', marginTop: 25, height: 35}}
+          />
+        </div>
+      )
+
+    }
+
+    if (browserState){
+      return renderBrowserStateView()
+    }
+
       return (
         <div style={{width: '100%', height: '100%', display: 'flex', flexDirection: 'column', paddingTop: 10}}>
-          <Title>VIRTUAL BROWSER</Title>
+          <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '90%', marginLeft: '5%', marginTop: 20, marginBottom: 35}}>
+            <div />
+            <Title>VIRTUAL BROWSER</Title>
+            <div onClick={reset}><img style={{width: 14, height: 14}} src={'/images/undo-arrow-black.png'}/></div>
+          </div>
 
         <div style={{display: 'flex', flexDirection: 'row', marginLeft: '5%', marginRight: '5%', marginBottom: 7, justifyContent: 'space-between'}}>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
@@ -64,16 +204,17 @@ function App() {
           </div>
           <Popup 
             trigger={<img src={'images/question.png'} style={{width:17, height: 17}} />}
-            position={'bottom center'}>
+            position={'left top'}>
               <div style={{display: 'flex', flexDirection: 'column'}}>
                 <img src={'/images/copy-token-screen.png'} style={{width: '100%'}} />
-                <InfoText>If you have a user's token yet you can copy it from your Tabula dashboard, if not leave the input empty to scrap it.</InfoText>
+                <InfoText>If you want to interact with a social media account used on Tabula, you can copy it from your Tabula dashboard.<br/><br />If not leave the input empty.</InfoText>
               </div>
             </Popup>
         </div>
         <Input 
           value={token}
           onChange={(e) => setToken(e.target.value)}
+          disabled={loading}
           style={{width: '90%', marginLeft: '5%', fontSize: 13, color: BLACK, height: 35}}
           placeholder={'TABULA_SESSION_TOKEN....'}
         />
@@ -87,7 +228,7 @@ function App() {
             </div>
             <Popup 
             trigger={<img src={'images/question.png'} style={{width:17, height: 17}} />}
-            position={'bottom center'}>
+            position={'left top'}>
               <div style={{display: 'flex', flexDirection: 'column'}}>
                 <img src={'/images/download-fp-screen.png'} style={{width: '100%'}} />
                 <InfoText>Download your fingerprint from your dashboard and drag it here.</InfoText>
@@ -102,6 +243,12 @@ function App() {
           />
         </div>} 
         {fingerprint && proxy && <div style={{marginLeft: '5%', marginRight: '5%', marginTop: 15}}><Fingerprint fingerprint={fingerprint} proxy={proxy} /></div>}
+        {fingerprint && <SectionTitle style={{marginTop:25, marginLeft: '5%', fontSize: 10.5}}>GOOGLE CHROME PATH</SectionTitle>}
+        {fingerprint && <Input 
+          value={chromePath || ''}
+          style={{width: '90%', marginLeft: '5%', fontSize: 11, color: BLACK, height: 25, marginTop: 5}}
+          onChange={(e) => setChromePathMiddleware(e.target.value)}
+        />}
         <Button 
           color={'black'}
           icon='images/chrome.png'
@@ -109,8 +256,9 @@ function App() {
           title={'START CHROME'}
           disabled={!fingerprint || !proxy}
           onClick={handlePlaywrightAction}
+          loading={loading}
           textStyle={{fontSize: 12}}
-          style={{width: '90%', marginLeft: '5%', marginTop: 25, height: 35}}
+          style={{width: '90%', marginLeft: '5%', marginTop: fingerprint ? 10: 25, height: 35}}
         />
         <span style={{color: 'red', fontSize: 12, marginTop: 10, marginLeft: '5%'}}>{error}</span>
       </div>
@@ -119,15 +267,9 @@ function App() {
 
   return (
       <div style={{display: 'flex', flexDirection: 'row', height: window.innerHeight, width: window.innerWidth}}>
-        <div style={{display:'flex', flexDirection: 'column', width: '50%', height: '100%'}}>
+        <div style={{display:'flex', flexDirection: 'column', width: '100%', height: '100%'}}>
           {renderNewWindow()}
-          {/* <div style={{height: '50%', width: '100%', backgroundColor: '#111111'}}/> */}
         </div>
-        <div style={{display:'flex', flexDirection: 'column', width: '50%', height: '100%'}}>
-          <div style={{height: '50%', width: '100%', backgroundColor: '#333333'}}/>
-          <div style={{height: '50%', width: '100%', backgroundColor: '#555555'}}/>
-        </div>
-        
       </div>
   )
 }
@@ -139,8 +281,6 @@ const Title = styled.span`
     text-align: center;
     font-family: 'Roboto', sans-serif;
     margin-left: 7px;
-    margin-top: 15px;
-    margin-bottom: 25px;
 `  
 
 const SectionTitle = styled.span`
@@ -150,7 +290,7 @@ const SectionTitle = styled.span`
 `
 
 const InfoText = styled.span`
-  font-size: 15px;
+  font-size: 13px;
   color: ${BLACK};
   font-family: 'Roboto', sans-serif;
   padding: 7px;

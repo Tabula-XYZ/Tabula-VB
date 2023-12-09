@@ -1,4 +1,3 @@
-
 export const sendIpcMessage = (channel:string, data: any) => {
     const { electron } = window as any;
     if (electron){

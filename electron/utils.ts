@@ -1,6 +1,7 @@
-const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const util = require('util');
+const exec = util.promisify(require('child_process').exec);
 
 function getChromePathWindows() {
     const chromePaths = [
@@ -21,7 +22,7 @@ function getChromePathWindows() {
 
 function getChromePathLinux() {
     return new Promise((resolve, reject) => {
-        exec("which google-chrome", (error: any, stdout: any, stderr: any) => {
+        exec("which google-chrome", (error: any, stdout: any) => {
             if (error) {
                 reject(error);
                 return;
@@ -80,6 +81,7 @@ export function isFilePath(str: string) {
 // execute a command and return the output ignoring errors
 export async function execCommand(cmd: string) {
     const { stdout } = await exec(cmd);
+    console.log(stdout)
     return stdout.trim();
   }
 
@@ -99,12 +101,14 @@ export async function testProxy(ip: string, port: number, username: string, pass
       setTimeout(() => {
         reject(new Error('Timeout'));
       }, timeout);
+      !resolve;
     });
   
     try {
       const res = await Promise.race([execPromise, timeoutPromise]);
       return res !== null && (res as any) < 400 
     } catch (error) {
+        console.log(error)
       return false;
     }
   }

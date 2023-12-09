@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import moment from "moment";
 import _ from 'lodash'
 import styled from "styled-components";
@@ -108,7 +108,6 @@ const Cell = (props: IProps) => {
     }
 
     const renderCell = () => {
-        const f = fingerprint
 
         let date: string | null = null
         if (geo){
