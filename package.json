@@ -13,7 +13,16 @@
     "links": "rm ./src/types.ts && ln -s /Users/louis/tweet/scrapper/src/types.ts ./src/types.ts"
   },
   "build": {
-    "displayName": "Tabula VB",
+    "files": [
+      "dist-electron/**/*",
+      "dist/**/*",
+      "node_modules/**/*",
+      "public/**/*"
+    ],
+    "directories": {
+      "buildResources": "build",
+      "output": "build"
+    }, 
     "mac": {
       "icon": "public/images/logo.png"
     },

@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'node:path'
 import { isFilePath } from './utils'
 import { VB } from './vb';
+// import fs from 'fs'
 
 process.env.DIST = path.join(__dirname, '../dist')
 process.env.VITE_PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.env.DIST, '../public')
@@ -70,11 +71,20 @@ function createWindow() {
     win?.webContents.send('main-process-message', (new Date).toLocaleString())
   })
 
-  if (VITE_DEV_SERVER_URL) {
+
+  // function logToFile(message: string) {
+  //   const logPath = path.join(app.getPath('userData'), 'app.log');
+  //   fs.appendFileSync(logPath, message + '\n');
+  // }
+
+  // logToFile('packaged : ' + app.isPackaged)
+  // logToFile('VITE_DEV_SERVER_URL: ' + VITE_DEV_SERVER_URL)
+  // logToFile('path: ' + path.join(process.env.DIST, 'index.html'))
+
+  if (!app.isPackaged && VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL)
   } else {
-    win.loadFile('dist/index.html')
-    // win.loadFile(path.join(process.env.DIST, 'index.html'))
+    win.loadFile(path.join(process.env.DIST, 'index.html'))
   }
 }
 

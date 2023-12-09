@@ -90,11 +90,11 @@ const Cell = (props: IProps) => {
         
         const platform = f.fingerprint.navigator.userAgentData.platform
         const version = f.fingerprint.navigator.userAgentData.platformVersion
-        let icon = '/images/linux.png'
+        let icon = 'images/linux.png'
         if (platform.toLowerCase().includes('windows')){
-            icon = '/images/windows.png'
+            icon = 'images/windows.png'
         } else if (platform.toLowerCase().includes('mac')){
-            icon = '/images/apple.png'
+            icon = 'images/apple.png'
         }
 
         return (

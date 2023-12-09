@@ -3,7 +3,7 @@ const Loading = (props: IProps) => {
 
     const { size,white } = props
     return (
-        <img src={`/anim/loading${white ?'-white' : ''}.svg`} alt={'loader'} style={Object.assign(props.style || {}, {width: size, height: size})} />
+        <img src={`anim/loading${white ?'-white' : ''}.svg`} alt={'loader'} style={Object.assign(props.style || {}, {width: size, height: size})} />
     )
 }
 

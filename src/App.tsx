@@ -186,15 +186,15 @@ function App() {
           </div>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
             <Input value={current_url} disabled={true}  />
-            <img onClick={() => onClickURL(current_url)}  style={{width: 20, height: 20, paddingLeft: '5%'}} src={'/images/copy-blue.png'} />
+            <img onClick={() => onClickURL(current_url)}  style={{width: 20, height: 20, paddingLeft: '5%'}} src={'images/copy-blue.png'} />
           </div>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 20, marginBottom: 5}}>
-            <img src={'/images/blue-key.png'} style={{width: 14, height: 14, marginRight: 4}} />
+            <img src={'images/blue-key.png'} style={{width: 14, height: 14, marginRight: 4}} />
             <SectionTitle>CURRENT TOKEN</SectionTitle>
           </div>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
             <Input value={context_base64} disabled={true}  />
-            <img onClick={() => onClickCopyToken(context_base64)}  style={{width: 20, height: 20, paddingLeft: '5%'}} src={'/images/copy-blue.png'} />
+            <img onClick={() => onClickCopyToken(context_base64)}  style={{width: 20, height: 20, paddingLeft: '5%'}} src={'images/copy-blue.png'} />
           </div>
           <Button 
             color={'red'}
@@ -223,19 +223,19 @@ function App() {
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '90%', marginLeft: '5%', marginTop: 20, marginBottom: 35}}>
             <div />
             <Title>VIRTUAL BROWSER</Title>
-            <div onClick={reset}><img style={{width: 14, height: 14}} src={'/images/undo-arrow-black.png'}/></div>
+            <div onClick={reset}><img style={{width: 14, height: 14}} src={'images/undo-arrow-black.png'}/></div>
           </div>
 
         <div style={{display: 'flex', flexDirection: 'row', marginLeft: '5%', marginRight: '5%', marginBottom: 7, justifyContent: 'space-between'}}>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-            <img src={'/images/blue-key.png'} style={{width: 14, height: 14, marginRight: 4}} />
+            <img src={'images/blue-key.png'} style={{width: 14, height: 14, marginRight: 4}} />
             <SectionTitle>TOKEN (optional)</SectionTitle>
           </div>
           <Popup 
             trigger={<img src={'images/question.png'} style={{width:17, height: 17}} />}
             position={'left top'}>
               <div style={{display: 'flex', flexDirection: 'column'}}>
-                <img src={'/images/copy-token-screen.png'} style={{width: '100%'}} />
+                <img src={'images/copy-token-screen.png'} style={{width: '100%'}} />
                 <InfoText>If you want to interact with a social media account used on Tabula, you can copy it from your Tabula dashboard.<br/><br />If not leave the input empty.</InfoText>
               </div>
             </Popup>
@@ -250,16 +250,16 @@ function App() {
         {!fingerprint && !proxy && (
           <div style={{marginLeft: '5%',marginRight: '5%', marginTop: 20, marginBottom: 7, display: 'flex', flexDirection: 'row', alignItems: 'center',justifyContent: 'space-between'}}>
             <div style={{display: 'flex', flexDirection: 'row'}}>
-              <img src={'/images/apple.png'} style={{width: 12, height: 12, marginRight: 3}} />
-              <img src={'/images/windows.png'} style={{width: 12, height: 12, marginRight: 3}} />
-              <img src={'/images/linux.png'} style={{width: 12, height: 12, marginRight: 3}} />
+              <img src={'images/apple.png'} style={{width: 12, height: 12, marginRight: 3}} />
+              <img src={'images/windows.png'} style={{width: 12, height: 12, marginRight: 3}} />
+              <img src={'images/linux.png'} style={{width: 12, height: 12, marginRight: 3}} />
               <SectionTitle>FINGERPRINT</SectionTitle>
             </div>
             <Popup 
             trigger={<img src={'images/question.png'} style={{width:17, height: 17}} />}
             position={'left top'}>
               <div style={{display: 'flex', flexDirection: 'column'}}>
-                <img src={'/images/download-fp-screen.png'} style={{width: '100%'}} />
+                <img src={'images/download-fp-screen.png'} style={{width: '100%'}} />
                 <InfoText>Download your fingerprint from your dashboard and drag it here.</InfoText>
               </div>
             </Popup>
