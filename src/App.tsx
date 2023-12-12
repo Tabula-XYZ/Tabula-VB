@@ -186,7 +186,7 @@ function App() {
           </div>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
             <Input value={current_url} disabled={true}  />
-            <img onClick={() => onClickURL(current_url)}  style={{width: 20, height: 20, paddingLeft: '5%'}} src={'images/copy-blue.png'} />
+            <img onClick={() => onClickURL(current_url)}  style={{width: 20, height: 20, paddingLeft: '5%', cursor: 'pointer'}} src={'images/copy-blue.png'} />
           </div>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 20, marginBottom: 5}}>
             <img src={'images/blue-key.png'} style={{width: 14, height: 14, marginRight: 4}} />
@@ -194,7 +194,7 @@ function App() {
           </div>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
             <Input value={context_base64} disabled={true}  />
-            <img onClick={() => onClickCopyToken(context_base64)}  style={{width: 20, height: 20, paddingLeft: '5%'}} src={'images/copy-blue.png'} />
+            <img onClick={() => onClickCopyToken(context_base64)}  style={{width: 20, height: 20, paddingLeft: '5%', cursor: 'pointer'}} src={'images/copy-blue.png'} />
           </div>
           <Button 
             color={'red'}
@@ -223,7 +223,7 @@ function App() {
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '90%', marginLeft: '5%', marginTop: 20, marginBottom: 35}}>
             <div />
             <Title>VIRTUAL BROWSER</Title>
-            <div onClick={reset}><img style={{width: 14, height: 14}} src={'images/undo-arrow-black.png'}/></div>
+            <div onClick={reset}><img style={{width: 14, height: 14,cursor: 'pointer'}} src={'images/undo-arrow-black.png'}/></div>
           </div>
 
         <div style={{display: 'flex', flexDirection: 'row', marginLeft: '5%', marginRight: '5%', marginBottom: 7, justifyContent: 'space-between'}}>
@@ -232,7 +232,7 @@ function App() {
             <SectionTitle>TOKEN (optional)</SectionTitle>
           </div>
           <Popup 
-            trigger={<img src={'images/question.png'} style={{width:17, height: 17}} />}
+            trigger={<img src={'images/question.png'} style={{width:17, height: 17, cursor: 'pointer'}} />}
             position={'left top'}>
               <div style={{display: 'flex', flexDirection: 'column'}}>
                 <img src={'images/copy-token-screen.png'} style={{width: '100%'}} />
@@ -256,7 +256,7 @@ function App() {
               <SectionTitle>FINGERPRINT</SectionTitle>
             </div>
             <Popup 
-            trigger={<img src={'images/question.png'} style={{width:17, height: 17}} />}
+            trigger={<img src={'images/question.png'} style={{width:17, height: 17, cursor: 'pointer'}} />}
             position={'left top'}>
               <div style={{display: 'flex', flexDirection: 'column'}}>
                 <img src={'images/download-fp-screen.png'} style={{width: '100%'}} />

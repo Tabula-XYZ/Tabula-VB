@@ -1,6 +1,6 @@
 import { Browser, BrowserContext, BrowserContextOptions } from "playwright";
 import { IFingerprintData, IProxy } from "../src/types";
-import { getChromePath, isBase64, isFilePath, removeCharactersBeforeUnderscore, testProxy } from "./utils";
+import { getChromePath, isBase64, isFilePath, logToFile, removeCharactersBeforeUnderscore, testProxy } from "./utils";
 import { chromium } from "playwright-extra";
 import { isObject } from "lodash";
 import { IBrowserState } from "../src/types2";
@@ -32,6 +32,7 @@ export class VB {
           try {
             return await getChromePath()
           } catch (e){
+            logToFile(`Error: ${e}`)
             return `Error: ${e}`
           }
         },
@@ -113,8 +114,10 @@ export class VB {
   
       if (proxy) {
         const ok = await testProxy(proxy.ip, proxy.port, proxy.username, proxy.password);
-        if (!ok)
+        if (ok === false)
           return `Error: Proxy ${proxy.ip}:${proxy.port} is not working`;
+        if (ok !== true) 
+          return ok;
       }
   
       try {
@@ -124,6 +127,7 @@ export class VB {
         });
         this.browser = browser;
       } catch (e) {
+        logToFile(`Error: ${e}`)
         return `Error: ${e}`;
       }
       this.browser.once('disconnected', async () => {
@@ -177,7 +181,7 @@ export class VB {
         const page = await context.newPage();
         await page.goto('https://google.com');
       } catch (e) {
-        console.log(e)
+        logToFile(`Error: ${e}`)
         return `Error: ${e}`;
       }
   

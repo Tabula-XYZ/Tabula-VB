@@ -96,6 +96,7 @@ const Container = styled.div`
         .dropdown-alert-text {
             color: white;
             font-size: 11px;
+            font-family: 'Roboto', sans-serif;
         }
     }
 

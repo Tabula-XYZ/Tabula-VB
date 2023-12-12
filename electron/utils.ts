@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
+import axios from 'axios';
+import { app } from 'electron'
 const exec = util.promisify(require('child_process').exec);
 
 function getChromePathWindows() {
@@ -81,37 +83,35 @@ export function isFilePath(str: string) {
 // execute a command and return the output ignoring errors
 export async function execCommand(cmd: string) {
     const { stdout } = await exec(cmd);
-    console.log(stdout)
     return stdout.trim();
   }
 
-export async function testProxy(ip: string, port: number, username: string, password: string, timeout = 5000) { // timeout in milliseconds
-    const credentials = `-U ${username}:${password}`;
-  
-    const cmd = `curl -s -o /dev/null -I -x ${ip}:${port} ${username && password ? credentials : ''} -w '%{http_code}' http://google.com | grep -oE '[0-9]+'`;
-  
-    // Function to execute the command
-    const execPromise = execCommand(cmd).then((output) => {
-      const httpCode = parseInt(output);
-      return isNaN(httpCode) ? null : httpCode;
-    });
-  
-    // Timeout promise
-    const timeoutPromise = new Promise((resolve, reject) => {
-      setTimeout(() => {
-        reject(new Error('Timeout'));
-      }, timeout);
-      !resolve;
-    });
-  
+
+  export async function testProxy(ip: string, port:number, username: string, password: string, timeout = 5000) {
+    // Configuration du proxy pour axios
+    const proxyConfig = {
+        host: ip,
+        port: port,
+        auth: username && password ? { username, password } : null
+    };
+
+    // Configuration de la requête axios
+    const config: any = {
+        proxy: proxyConfig,
+        timeout: timeout,
+        method: 'get',
+        url: 'http://google.com'
+    };
+
     try {
-      const res = await Promise.race([execPromise, timeoutPromise]);
-      return res !== null && (res as any) < 400 
+        const response = await axios(config);
+        // Vérifier le code de réponse HTTP
+        return response.status && response.status < 400;
     } catch (error) {
-        console.log(error)
-      return false;
+        logToFile(`Error: ${error}`);
+        return false;
     }
-  }
+}
   
 export  function removeCharactersBeforeUnderscore(inputString: string): string {
     const parts = inputString.split('_');
@@ -131,3 +131,8 @@ export  function removeCharactersBeforeUnderscore(inputString: string): string {
         return false;
     }
   }
+
+export function logToFile(message: string) {
+  const logPath = path.join(app.getPath('userData'), 'app.log');
+  fs.appendFileSync(logPath, message + '\n');
+}
