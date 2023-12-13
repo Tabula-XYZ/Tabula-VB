@@ -16,7 +16,6 @@ import { IBrowserState } from './types2'
 const SEC_BEFORE_REFRESH = 30
 let browserStateFetchingCount = 0
 
-
 const storedfingerprint = localStorage.getItem('fingerprint')
 const storedproxy = localStorage.getItem('proxy')
 
