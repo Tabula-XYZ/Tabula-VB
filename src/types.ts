@@ -19,6 +19,17 @@ export type TTaskCronable = 'post_tweet' | 'follow_mass' | 'unfollow_mass' | 'po
 export type TSubTaskCronbablePostTweet = 'tweet' | 'thread'
 export type TReplyTrigger = '1H' | '2H' | '4H' | '6H' | '12H' | '24H'
 
+export type SOCIAL_DOMAIN = 'facebook.com' | 'twitter.com' | 'pinterest.com' | 'linkedin.com' | 'instagram.com'
+
+export const CONTEXT_PREFIX: {[key in SOCIAL_DOMAIN]: string} = {
+    'facebook.com': 'FB_TOKEN_',
+    'twitter.com': 'TWITTER_TOKEN_',
+    'pinterest.com': 'PINTEREST_TOKEN_',
+    'linkedin.com': 'LINKEDIN_TOKEN_',
+    'instagram.com': 'IG_TOKEN_',
+}
+
+
 export const ReplyTriggerList: TReplyTrigger[] = ['1H', '2H', '4H', '6H', '12H', '24H']
 
 export type TNotifType = 'error' | 'success' | 'warning' | 'info'
