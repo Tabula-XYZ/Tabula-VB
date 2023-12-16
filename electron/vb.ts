@@ -1,5 +1,5 @@
 import { Browser, BrowserContext, BrowserContextOptions } from "playwright";
-import { IFingerprintData, IProxy } from "../src/types";
+import { CONTEXT_PREFIX, IFingerprintData, IProxy, SOCIAL_DOMAIN } from "../src/types";
 import { getChromePath, isBase64, isFilePath, logToFile, removeCharactersBeforeUnderscore, testProxy } from "./utils";
 import { chromium } from "playwright-extra";
 import { isObject } from "lodash";
@@ -53,21 +53,18 @@ export class VB {
           const state = await context.storageState()
           Buffer.from(JSON.stringify(state)).toString('base64')
           const url  = pages[0].url()
-          let CONTEXT_PREFIX = ''
-          if (url.includes('facebook.com')){
-            CONTEXT_PREFIX = 'FB_TOKEN_'
-          } else if (url.includes('instagram.com')){
-            CONTEXT_PREFIX = 'IG_TOKEN_'
-          } else if (url.includes('twitter.com')){
-            CONTEXT_PREFIX = 'TWITTER_TOKEN_'
-          } else if (url.includes('linkedin.com')){
-            CONTEXT_PREFIX = 'LINKEDIN_TOKEN_'
-          } else if (url.includes('pinterest.com')){
-            CONTEXT_PREFIX = 'PINTEREST_TOKEN_'
+        
+
+          let contextPrefix = ''
+          for (const domain in CONTEXT_PREFIX){
+            if (url.includes(domain)){
+              contextPrefix = CONTEXT_PREFIX[domain as SOCIAL_DOMAIN]
+              break
+            }
           }
-  
+
           const s: IBrowserState = {
-            context_base64: CONTEXT_PREFIX+ Buffer.from(JSON.stringify(state)).toString('base64'),
+            context_base64: contextPrefix+ Buffer.from(JSON.stringify(state)).toString('base64'),
             current_url: pages[0].url(),
             chrome_path: this.browserSettings?.chrome_path || '',
             connected: browser.isConnected(),
