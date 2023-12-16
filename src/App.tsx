@@ -164,6 +164,9 @@ function App() {
     setProxy(null)
     setToken('')
     setError(null)
+    localStorage.removeItem('fingerprint')
+    localStorage.removeItem('proxy')
+    
     closeBrowser()
 
   }

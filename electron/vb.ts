@@ -121,9 +121,18 @@ export class VB {
       }
   
       try {
+        let proxyOpt: any = undefined
+        if (proxy){
+          proxyOpt = proxy ? {
+            server: `http://${proxy.ip}:${proxy.port}`,
+            username: proxy.username,
+            password: proxy.password
+          } : undefined;
+        }
         const browser = await chromium.launch({
           headless: false,
           executablePath: CHROME_BIN_PATH,
+          proxy: proxyOpt
         });
         this.browser = browser;
       } catch (e) {
@@ -137,17 +146,10 @@ export class VB {
         this.context = null;
       });
   
-      const proxyOpt = proxy ? {
-        server: `${proxy.ip}:${proxy.port}`,
-        username: proxy.username,
-        password: proxy.password
-      } : undefined;
-  
       const opt: BrowserContextOptions = {
-        bypassCSP: true,
-        proxy: proxyOpt
+        bypassCSP: true
       };
-  
+
       let fingerPrintValid = false
       if (fingerprint){
           opt.userAgent = fingerprint.fingerprint.navigator.userAgent,
